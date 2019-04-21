@@ -8,3 +8,6 @@ The Azuure SaaS Fulfillment API V2 reference is: [here](https://docs.microsoft.c
 There is also a Postman collection showing the mock API.
 
 This client is based on the mock API referenced in the article above.
+
+The client is also available as a Nuget package at https://www.nuget.org/packages/AzureMarketplaceSaaSApiClient/
+

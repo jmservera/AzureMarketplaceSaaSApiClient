@@ -1,8 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <PackageId>AzureMarketplaceSaaSApiClient</PackageId>
+    <Authors>Ercenk Keresteci</Authors>
+    <Product>AzureMarketplaceSaaSApiClient</Product>
+    <Description>An experimental .NET client implementation for the Azure Marketplace SaaS Fulfillment API V2 based on the mock API</Description>
+    <Copyright>Ercenk Keresteci</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ercenk/AzureMarketplaceSaaSApiClient</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ercenk/AzureMarketplaceSaaSApiClient</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>Azure, Marketplace</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
