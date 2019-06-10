@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-using SaaSFulfillmentClient.Models;
-
-namespace SaaSFulfillment.Models
+namespace SaaSFulfillmentClient.Models
 {
     public enum OperationStatusEnum
     {

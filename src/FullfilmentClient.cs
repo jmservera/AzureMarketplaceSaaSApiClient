@@ -8,49 +8,37 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
-
 using Newtonsoft.Json;
-
 using SaaSFulfillmentClient.Models;
 
-namespace SaaSFulfillment
+namespace SaaSFulfillmentClient
 {
-    public class FullfilmentClient : IFulfillmentClient
+    public class FulfillmentClient : IFulfillmentClient
     {
-        private const string BaseUrl = "https://marketplaceapi.microsoft.com/api/saas";
-        private const string DefaultApiVersion = "2018-08-31";
         private const string DefaultApiVersionParameterName = "api-version";
         private readonly string apiVersion;
         private readonly string baseUri;
         private readonly HttpMessageHandler httpMessageHandler;
-        private readonly ILogger logger;
+        private readonly ILogger<FulfillmentClient> logger;
 
-        public FullfilmentClient(ILogger logger) : this(BaseUrl, DefaultApiVersion, null, logger)
+        public FulfillmentClient(FulfillmentClientConfiguration configuration, ILogger<FulfillmentClient> logger) : this(null, configuration, logger)
         {
         }
 
-        public FullfilmentClient(string baseUri, string apiVersion, ILogger logger) : this(baseUri, apiVersion, null, logger)
+        public FulfillmentClient(HttpMessageHandler httpMessageHandler, FulfillmentClientConfiguration configuration, ILogger<FulfillmentClient> logger)
         {
-        }
-
-        public FullfilmentClient(HttpMessageHandler httpMessageHandler, ILogger logger) : this(BaseUrl, DefaultApiVersion, httpMessageHandler, logger)
-        {
-        }
-
-        public FullfilmentClient(string baseUri, string apiVersion, HttpMessageHandler httpMessageHandler, ILogger logger)
-        {
-            this.baseUri = baseUri;
-            this.apiVersion = apiVersion;
+            this.baseUri = configuration.BaseUri;
+            this.apiVersion = configuration.ApiVersion;
             this.logger = logger;
             this.httpMessageHandler = httpMessageHandler;
         }
 
-        public async Task<FullfilmentRequestResult> ActivateSubscriptionAsync(string subscriptionId, ActivatedSubscription subscriptionDetails, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
+        public async Task<FullfilmentRequestResult> ActivateSubscriptionAsync(Guid subscriptionId, ActivatedSubscription subscriptionDetails, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
         {
             var requestUrl = FluentUriBuilder
                 .Start(this.baseUri)
                 .AddPath("subscriptions")
-                .AddPath(subscriptionId)
+                .AddPath(subscriptionId.ToString())
                 .AddPath("activate")
                 .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
                 .Uri;
@@ -71,12 +59,12 @@ namespace SaaSFulfillment
             return await FullfilmentRequestResult.ParseAsync<FullfilmentRequestResult>(response);
         }
 
-        public async Task<FullfilmentRequestResult> DeleteSubscriptionAsync(string subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
+        public async Task<UpdateOrDeleteSubscriptionRequestResult> DeleteSubscriptionAsync(Guid subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
         {
             var requestUrl = FluentUriBuilder
                 .Start(this.baseUri)
                 .AddPath("subscriptions")
-                .AddPath(subscriptionId)
+                .AddPath(subscriptionId.ToString())
                 .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
                 .Uri;
 
@@ -93,59 +81,7 @@ namespace SaaSFulfillment
                 "",
                 cancellationToken);
 
-            return await FullfilmentRequestResult.ParseAsync<FullfilmentRequestResult>(response);
-        }
-
-        public async Task<SubscriptionOperation> GetSubscriptionOperationAsync(string subscriptionId, string operationId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
-        {
-            var requestUrl = FluentUriBuilder
-            .Start(this.baseUri)
-            .AddPath("subscriptions")
-            .AddPath(subscriptionId)
-            .AddPath("operations")
-            .AddPath(operationId)
-            .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
-            .Uri;
-
-            requestId = requestId == default ? Guid.NewGuid() : requestId;
-            correlationId = correlationId == default ? Guid.NewGuid() : correlationId;
-
-            var response = await this.SendRequestAndReturnResult(
-                HttpMethod.Get,
-                requestUrl,
-                requestId,
-                correlationId,
-                bearerToken,
-                null,
-                "",
-                cancellationToken);
-
-            return await FullfilmentRequestResult.ParseAsync<SubscriptionOperation>(response);
-        }
-
-        public async Task<IEnumerable<SubscriptionOperation>> GetSubscriptionOperationsAsync(string subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
-        {
-            var requestUrl = FluentUriBuilder
-            .Start(this.baseUri)
-            .AddPath("subscriptions")
-            .AddPath(subscriptionId)
-            .AddPath("operations")
-            .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
-            .Uri;
-
-            requestId = requestId == default ? Guid.NewGuid() : requestId;
-            correlationId = correlationId == default ? Guid.NewGuid() : correlationId;
-
-            var response = await this.SendRequestAndReturnResult(HttpMethod.Get,
-                requestUrl,
-                requestId,
-                correlationId,
-                bearerToken,
-                null,
-                "",
-                cancellationToken);
-
-            return await FullfilmentRequestResult.ParseMultipleAsync<SubscriptionOperation>(response);
+            return await FullfilmentRequestResult.ParseAsync<UpdateOrDeleteSubscriptionRequestResult>(response);
         }
 
         public async Task<IEnumerable<SubscriptionOperation>> GetOperationsAsync(Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
@@ -171,12 +107,12 @@ namespace SaaSFulfillment
             return await FullfilmentRequestResult.ParseMultipleAsync<SubscriptionOperation>(response);
         }
 
-        public async Task<Subscription> GetSubscriptionAsync(string subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
+        public async Task<Subscription> GetSubscriptionAsync(Guid subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
         {
             var requestUrl = FluentUriBuilder
             .Start(this.baseUri)
             .AddPath("subscriptions")
-            .AddPath(subscriptionId)
+            .AddPath(subscriptionId.ToString())
             .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
             .Uri;
 
@@ -195,12 +131,64 @@ namespace SaaSFulfillment
             return await FullfilmentRequestResult.ParseAsync<Subscription>(response);
         }
 
-        public async Task<SubscriptionPlans> GetSubscriptionPlansAsync(string subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
+        public async Task<SubscriptionOperation> GetSubscriptionOperationAsync(Guid subscriptionId, string operationId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
+        {
+            var requestUrl = FluentUriBuilder
+            .Start(this.baseUri)
+            .AddPath("subscriptions")
+            .AddPath(subscriptionId.ToString())
+            .AddPath("operations")
+            .AddPath(operationId)
+            .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
+            .Uri;
+
+            requestId = requestId == default ? Guid.NewGuid() : requestId;
+            correlationId = correlationId == default ? Guid.NewGuid() : correlationId;
+
+            var response = await this.SendRequestAndReturnResult(
+                HttpMethod.Get,
+                requestUrl,
+                requestId,
+                correlationId,
+                bearerToken,
+                null,
+                "",
+                cancellationToken);
+
+            return await FullfilmentRequestResult.ParseAsync<SubscriptionOperation>(response);
+        }
+
+        public async Task<IEnumerable<SubscriptionOperation>> GetSubscriptionOperationsAsync(Guid subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
+        {
+            var requestUrl = FluentUriBuilder
+            .Start(this.baseUri)
+            .AddPath("subscriptions")
+            .AddPath(subscriptionId.ToString())
+            .AddPath("operations")
+            .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
+            .Uri;
+
+            requestId = requestId == default ? Guid.NewGuid() : requestId;
+            correlationId = correlationId == default ? Guid.NewGuid() : correlationId;
+
+            var response = await this.SendRequestAndReturnResult(HttpMethod.Get,
+                requestUrl,
+                requestId,
+                correlationId,
+                bearerToken,
+                null,
+                "",
+                cancellationToken);
+
+            return await FullfilmentRequestResult.ParseMultipleAsync<SubscriptionOperation>(response);
+        }
+
+        public async Task<SubscriptionPlans> GetSubscriptionPlansAsync(Guid subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
         {
             var requestUrl = FluentUriBuilder
                 .Start(this.baseUri)
                 .AddPath("subscriptions")
-                .AddPath(subscriptionId)
+                .AddPath(subscriptionId.ToString())
                 .AddPath("listAvailablePlans")
                 .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
                 .Uri;
@@ -286,12 +274,12 @@ namespace SaaSFulfillment
             return await FullfilmentRequestResult.ParseAsync<ResolvedSubscription>(response);
         }
 
-        public async Task<UpdateSubscriptionResult> UpdateSubscriptionAsync(string subscriptionId, ActivatedSubscription update, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
+        public async Task<UpdateOrDeleteSubscriptionRequestResult> UpdateSubscriptionAsync(Guid subscriptionId, ActivatedSubscription update, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
         {
             var requestUrl = FluentUriBuilder
                 .Start(this.baseUri)
                 .AddPath("subscriptions")
-                .AddPath(subscriptionId)
+                .AddPath(subscriptionId.ToString())
                 .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
                 .Uri;
 
@@ -314,7 +302,7 @@ namespace SaaSFulfillment
                 updateContent,
                 cancellationToken);
 
-            return await FullfilmentRequestResult.ParseAsync<UpdateSubscriptionResult>(response);
+            return await FullfilmentRequestResult.ParseAsync<UpdateOrDeleteSubscriptionRequestResult>(response);
         }
 
         private static HttpRequestMessage BuildRequest(

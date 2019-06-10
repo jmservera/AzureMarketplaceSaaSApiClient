@@ -15,17 +15,12 @@ namespace SaaSFulfillmentClient.Models
 
         public FullfilmentRequestResult()
         {
+            this.Success = false;
         }
 
         public Guid RequestId { get; set; }
 
-        protected virtual void UpdateFromHeaders(HttpHeaders headers)
-        {
-            if (headers.TryGetValues(requestIdKey, out var values))
-            {
-                this.RequestId = Guid.Parse(values.First());
-            }
-        }
+        public bool Success { get; set; }
 
         public static async Task<T> ParseAsync<T>(HttpResponseMessage response) where T : FullfilmentRequestResult, new()
         {
@@ -43,6 +38,8 @@ namespace SaaSFulfillmentClient.Models
 
             result.UpdateFromHeaders(response.Headers);
 
+            result.Success = response.IsSuccessStatusCode;
+
             return result;
         }
 
@@ -58,6 +55,14 @@ namespace SaaSFulfillmentClient.Models
             }
 
             return results;
+        }
+
+        protected virtual void UpdateFromHeaders(HttpHeaders headers)
+        {
+            if (headers.TryGetValues(requestIdKey, out var values))
+            {
+                this.RequestId = Guid.Parse(values.First());
+            }
         }
     }
 }

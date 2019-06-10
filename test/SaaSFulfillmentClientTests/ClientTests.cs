@@ -13,9 +13,7 @@ using Moq;
 using Moq.Protected;
 
 using Newtonsoft.Json;
-
-using SaaSFulfillment;
-
+using SaaSFulfillmentClient;
 using SaaSFulfillmentClient.Models;
 
 using Xunit;
@@ -24,16 +22,19 @@ namespace SaaSFulfillmentClientTests
 {
     public class ClientTests
     {
-        private readonly FullfilmentClient client;
-        private readonly Mock<ILogger> loggerMock;
-        private readonly Mock<HttpMessageHandler> mockHttpMessageHandler;
+        private const string MockApiVersion = "2018-09-15";
+        private const string MockUri = "https://marketplaceapi.microsoft.com/api/saas";
+        private readonly FulfillmentClient client;
+        private readonly Mock<ILogger<FulfillmentClient>> loggerMock;
+        private Mock<HttpMessageHandler> mockHttpMessageHandler;
 
         public ClientTests()
         {
             this.mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-            this.loggerMock = new Mock<ILogger>();
+            this.loggerMock = new Mock<ILogger<FulfillmentClient>>();
+            var configuration = new FulfillmentClientConfiguration { BaseUri = MockUri, ApiVersion = MockApiVersion };
 
-            this.client = new FullfilmentClient(this.mockHttpMessageHandler.Object, this.loggerMock.Object);
+            this.client = new FulfillmentClient(this.mockHttpMessageHandler.Object, configuration, this.loggerMock.Object);
         }
 
         [Fact]
@@ -61,7 +62,7 @@ namespace SaaSFulfillmentClientTests
 
                     // Is it the ApiVersion and the correct one?
                     Assert.Equal("api-version", queryParameters.Keys[0]);
-                    Assert.Equal("2018-08-31", queryParameters[0]);
+                    Assert.Equal(MockApiVersion, queryParameters[0]);
 
                     // Check headers
                     var headers = r.Headers;
@@ -114,7 +115,7 @@ namespace SaaSFulfillmentClientTests
 
                     // Is it the ApiVersion and the correct one?
                     Assert.Equal("api-version", queryParameters.Keys[0]);
-                    Assert.Equal("2018-08-31", queryParameters[0]);
+                    Assert.Equal(MockApiVersion, queryParameters[0]);
 
                     // Check headers
                     var headers = r.Headers;

@@ -4,13 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
-
 using Moq;
-
-using SaaSFulfillment;
-
+using SaaSFulfillmentClient;
 using SaaSFulfillmentClient.Models;
-
 using Xunit;
 
 namespace SaaSFulfillmentClientTests
@@ -19,16 +15,15 @@ namespace SaaSFulfillmentClientTests
     {
         private const string MockApiVersion = "2018-09-15";
         private const string MockUri = "https://marketplaceapi.microsoft.com/api/saas";
-        private readonly FullfilmentClient client;
-        private readonly Mock<ILogger> loggerMock;
+        private readonly FulfillmentClient client;
+        private readonly Mock<ILogger<FulfillmentClient>> loggerMock;
 
         public MockApiTests()
         {
-            this.loggerMock = new Mock<ILogger>();
-            this.client = new
-            FullfilmentClient(MockUri,
-                MockApiVersion,
-            this.loggerMock.Object);
+            this.loggerMock = new Mock<ILogger<FulfillmentClient>>();
+            var configuration = new FulfillmentClientConfiguration { BaseUri = MockUri, ApiVersion = MockApiVersion };
+
+            this.client = new FulfillmentClient(configuration, this.loggerMock.Object);
         }
 
         [Fact]
@@ -48,7 +43,7 @@ namespace SaaSFulfillmentClientTests
             requestId = Guid.NewGuid();
 
             var result = await this.client.ActivateSubscriptionAsync(
-                subscriptions.First().SubscriptionId.ToString(),
+                subscriptions.First().SubscriptionId,
                 new ActivatedSubscription { PlanId = "Gold", Quantity = "" },
                 requestId,
                 correlationId,
@@ -75,7 +70,7 @@ namespace SaaSFulfillmentClientTests
             requestId = Guid.NewGuid();
 
             var result = await this.client.DeleteSubscriptionAsync(
-                subscriptions.First().SubscriptionId.ToString(),
+                subscriptions.First().SubscriptionId,
                 requestId,
                 correlationId,
                 string.Empty,
@@ -83,95 +78,7 @@ namespace SaaSFulfillmentClientTests
 
             Assert.IsType<Guid>(result.RequestId);
             Assert.NotEqual(Guid.Empty, result.RequestId);
-        }
-
-        [Fact]
-        public async Task CanGetSubscription()
-        {
-            var correlationId = Guid.NewGuid();
-            var requestId = Guid.NewGuid();
-
-            var subscriptions = await this.client.GetSubscriptionsAsync(
-                requestId,
-                correlationId,
-                string.Empty,
-                new CancellationTokenSource().Token);
-
-            Assert.Equal(requestId, subscriptions.First().RequestId);
-
-            requestId = Guid.NewGuid();
-
-            var result = await this.client.GetSubscriptionAsync(
-                subscriptions.First().SubscriptionId.ToString(),
-                requestId,
-                correlationId,
-                string.Empty,
-                new CancellationTokenSource().Token);
-
-            Assert.NotNull(result);
-            Assert.Equal(subscriptions.First().SubscriptionId, result.SubscriptionId);
-        }
-
-        [Fact]
-        public async Task CanGetSubscriptionOperation()
-        {
-            var correlationId = Guid.NewGuid();
-            var requestId = Guid.NewGuid();
-
-            var subscriptions = await this.client.GetSubscriptionsAsync(
-                requestId,
-                correlationId,
-                string.Empty,
-                new CancellationTokenSource().Token);
-
-            Assert.Equal(requestId, subscriptions.First().RequestId);
-
-            requestId = Guid.NewGuid();
-
-            var operations = await this.client.GetSubscriptionOperationsAsync(
-                subscriptions.First().SubscriptionId.ToString(),
-                requestId,
-                correlationId,
-                string.Empty,
-                new CancellationTokenSource().Token);
-
-            Assert.Equal(requestId, operations.First().RequestId);
-
-            var operation = await this.client.GetSubscriptionOperationAsync(
-                subscriptions.First().SubscriptionId.ToString(),
-                operations.First().Id.ToString(),
-                requestId,
-                correlationId,
-                string.Empty,
-                new CancellationTokenSource().Token);
-
-            Assert.NotNull(operation);
-        }
-
-        [Fact]
-        public async Task CanGetSubscriptionOperations()
-        {
-            var correlationId = Guid.NewGuid();
-            var requestId = Guid.NewGuid();
-
-            var subscriptions = await this.client.GetSubscriptionsAsync(
-                requestId,
-                correlationId,
-                string.Empty,
-                new CancellationTokenSource().Token);
-
-            Assert.Equal(requestId, subscriptions.First().RequestId);
-
-            requestId = Guid.NewGuid();
-
-            var result = await this.client.GetSubscriptionOperationsAsync(
-                subscriptions.First().SubscriptionId.ToString(),
-                requestId,
-                correlationId,
-                string.Empty,
-                new CancellationTokenSource().Token);
-
-            Assert.NotEmpty(result);
+            Assert.NotEqual(0, result.RetryAfter);
         }
 
         [Fact]
@@ -200,6 +107,95 @@ namespace SaaSFulfillmentClientTests
         }
 
         [Fact]
+        public async Task CanGetSubscription()
+        {
+            var correlationId = Guid.NewGuid();
+            var requestId = Guid.NewGuid();
+
+            var subscriptions = await this.client.GetSubscriptionsAsync(
+                requestId,
+                correlationId,
+                string.Empty,
+                new CancellationTokenSource().Token);
+
+            Assert.Equal(requestId, subscriptions.First().RequestId);
+
+            requestId = Guid.NewGuid();
+
+            var result = await this.client.GetSubscriptionAsync(
+                subscriptions.First().SubscriptionId,
+                requestId,
+                correlationId,
+                string.Empty,
+                new CancellationTokenSource().Token);
+
+            Assert.NotNull(result);
+            Assert.Equal(subscriptions.First().SubscriptionId, result.SubscriptionId);
+        }
+
+        [Fact]
+        public async Task CanGetSubscriptionOperation()
+        {
+            var correlationId = Guid.NewGuid();
+            var requestId = Guid.NewGuid();
+
+            var subscriptions = await this.client.GetSubscriptionsAsync(
+                requestId,
+                correlationId,
+                string.Empty,
+                new CancellationTokenSource().Token);
+
+            Assert.Equal(requestId, subscriptions.First().RequestId);
+
+            requestId = Guid.NewGuid();
+
+            var operations = await this.client.GetSubscriptionOperationsAsync(
+                subscriptions.First().SubscriptionId,
+                requestId,
+                correlationId,
+                string.Empty,
+                new CancellationTokenSource().Token);
+
+            Assert.Equal(requestId, operations.First().RequestId);
+
+            var operation = await this.client.GetSubscriptionOperationAsync(
+                subscriptions.First().SubscriptionId,
+                operations.First().Id.ToString(),
+                requestId,
+                correlationId,
+                string.Empty,
+                new CancellationTokenSource().Token);
+
+            Assert.NotNull(operation);
+        }
+
+        [Fact]
+        public async Task CanGetSubscriptionOperations()
+        {
+            var correlationId = Guid.NewGuid();
+            var requestId = Guid.NewGuid();
+
+            var subscriptions = await this.client.GetSubscriptionsAsync(
+                requestId,
+                correlationId,
+                string.Empty,
+                new CancellationTokenSource().Token);
+
+            Assert.Equal(requestId, subscriptions.First().RequestId);
+
+            requestId = Guid.NewGuid();
+
+            var result = await this.client.GetSubscriptionOperationsAsync(
+                subscriptions.First().SubscriptionId,
+                requestId,
+                correlationId,
+                string.Empty,
+                new CancellationTokenSource().Token);
+
+            Assert.NotEmpty(result);
+        }
+
+        [Fact]
         public async Task CanGetSubscriptionPlans()
         {
             var correlationId = Guid.NewGuid();
@@ -216,7 +212,7 @@ namespace SaaSFulfillmentClientTests
             requestId = Guid.NewGuid();
 
             var result = await this.client.GetSubscriptionPlansAsync(
-                subscriptions.First().SubscriptionId.ToString(),
+                subscriptions.First().SubscriptionId,
                 requestId,
                 correlationId,
                 string.Empty,
@@ -278,7 +274,7 @@ namespace SaaSFulfillmentClientTests
             var update = new ActivatedSubscription { PlanId = "Gold", Quantity = "" };
 
             var result = await this.client.UpdateSubscriptionAsync(
-                subscriptions.First().SubscriptionId.ToString(),
+                subscriptions.First().SubscriptionId,
                 update,
               requestId,
                 correlationId,
@@ -287,6 +283,7 @@ namespace SaaSFulfillmentClientTests
 
             Assert.NotNull(result.Operation);
             Assert.NotNull(result);
+            Assert.NotEqual(0, result.RetryAfter);
         }
     }
 }

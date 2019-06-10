@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-namespace SaaSFulfillment.Models
+namespace SaaSFulfillmentClient.Models
 {
     public enum ActionEnum
     {

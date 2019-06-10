@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Web;
 
-namespace SaaSFulfillment
+namespace SaaSFulfillmentClient
 {
     public class FluentUriBuilder
     {

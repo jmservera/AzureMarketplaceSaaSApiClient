@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 
-namespace SaaSFulfillmentSDKUnofficial.Client.Models
+namespace SaaSFulfillmentClient.Models
 {
     public class UpdateOrDeleteSubscriptionRequestResult : FullfilmentRequestResult
     {
@@ -32,19 +32,19 @@ namespace SaaSFulfillmentSDKUnofficial.Client.Models
                 this.Operation = operationUri;
             }
 
-            values = default(IEnumerable<string>);
+            values = default;
 
             if (headers.TryGetValues(retryAfterKey, out values))
             {
-                int retryAfter = 0;
+                var retryAfter = 0;
 
                 int.TryParse(values.First(), out retryAfter);
 
-                if (retry == null)
+                if (retryAfter == 0)
                 {
                     throw new ApplicationException("API did not return a retry-after value");
                 }
-                this.Operation = operationUri;
+                this.RetryAfter = retryAfter;
             }
         }
     }
