@@ -287,7 +287,7 @@ namespace SaaSFulfillmentClient
             correlationId = correlationId == default ? Guid.NewGuid() : correlationId;
             var updateContent = JsonConvert.SerializeObject(update);
 
-            if (update.PlanId != string.Empty && update.Quantity != string.Empty)
+            if (!string.IsNullOrEmpty(update.PlanId) && !string.IsNullOrEmpty(update.Quantity))
             {
                 throw new ApplicationException("Plan Id and quantity cannot be patched at the same time.");
             }
@@ -352,7 +352,10 @@ namespace SaaSFulfillmentClient
             return new HttpClient(this.httpMessageHandler);
         }
 
+#pragma warning disable CA1068 // CancellationToken parameters must come last
+
         private async Task<HttpResponseMessage> SendRequestAndReturnResult(
+#pragma warning restore CA1068 // CancellationToken parameters must come last
             HttpMethod method,
             Uri requestUri,
             Guid requestId,

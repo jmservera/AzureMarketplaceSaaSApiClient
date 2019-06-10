@@ -26,7 +26,7 @@ namespace SaaSFulfillmentClientTests
         private const string MockUri = "https://marketplaceapi.microsoft.com/api/saas";
         private readonly FulfillmentClient client;
         private readonly Mock<ILogger<FulfillmentClient>> loggerMock;
-        private Mock<HttpMessageHandler> mockHttpMessageHandler;
+        private readonly Mock<HttpMessageHandler> mockHttpMessageHandler;
 
         public ClientTests()
         {

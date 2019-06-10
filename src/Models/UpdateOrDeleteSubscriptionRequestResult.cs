@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 
@@ -8,8 +6,8 @@ namespace SaaSFulfillmentClient.Models
 {
     public class UpdateOrDeleteSubscriptionRequestResult : FullfilmentRequestResult
     {
-        private const string operationLocationKey = "Operation-Location";
-        private const string retryAfterKey = "Retry-After";
+        private const string OperationLocationKey = "Operation-Location";
+        private const string RetryAfterKey = "Retry-After";
 
         public Uri Operation { get; set; }
 
@@ -19,26 +17,15 @@ namespace SaaSFulfillmentClient.Models
         {
             base.UpdateFromHeaders(headers);
 
-            IEnumerable<string> values;
-            if (headers.TryGetValues(operationLocationKey, out values))
+            if (headers.TryGetValues(OperationLocationKey, out var values))
             {
-                Uri operationUri;
-                Uri.TryCreate(values.First(), UriKind.Absolute, out operationUri);
-
-                if (operationUri == null)
-                {
-                    throw new ApplicationException("API did not return an operation ID");
-                }
-                this.Operation = operationUri;
+                Uri.TryCreate(values.First(), UriKind.Absolute, out var operationUri);
+                this.Operation = operationUri ?? throw new ApplicationException("API did not return an operation ID");
             }
 
-            values = default;
-
-            if (headers.TryGetValues(retryAfterKey, out values))
+            if (headers.TryGetValues(RetryAfterKey, out values))
             {
-                var retryAfter = 0;
-
-                int.TryParse(values.First(), out retryAfter);
+                int.TryParse(values.First(), out var retryAfter);
 
                 if (retryAfter == 0)
                 {
