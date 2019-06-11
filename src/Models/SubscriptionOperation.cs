@@ -13,7 +13,7 @@ namespace SaaSFulfillmentClient.Models
         public string PublisherId { get; set; }
         public string Quantity { get; set; }
         public Uri ResourceLocation { get; set; }
-        public string Status { get; set; }
+        public OperationStatusEnum Status { get; set; }
         public Guid SubscriptionId { get; set; }
         public DateTime TimeStamp { get; set; }
     }

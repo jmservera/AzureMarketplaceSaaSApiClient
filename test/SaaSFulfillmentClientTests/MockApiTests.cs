@@ -167,6 +167,7 @@ namespace SaaSFulfillmentClientTests
                 new CancellationTokenSource().Token);
 
             Assert.NotNull(operation);
+            Assert.IsType<OperationStatusEnum>(operation.Status);
         }
 
         [Fact]

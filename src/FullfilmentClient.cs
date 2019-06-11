@@ -353,7 +353,6 @@ namespace SaaSFulfillmentClient
         }
 
 #pragma warning disable CA1068 // CancellationToken parameters must come last
-
         private async Task<HttpResponseMessage> SendRequestAndReturnResult(
 #pragma warning restore CA1068 // CancellationToken parameters must come last
             HttpMethod method,
