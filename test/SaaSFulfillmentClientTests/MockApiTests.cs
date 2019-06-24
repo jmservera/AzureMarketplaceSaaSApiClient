@@ -160,7 +160,7 @@ namespace SaaSFulfillmentClientTests
 
             var operation = await this.client.GetSubscriptionOperationAsync(
                 subscriptions.First().SubscriptionId,
-                operations.First().Id.ToString(),
+                operations.First().Id,
                 requestId,
                 correlationId,
                 string.Empty,

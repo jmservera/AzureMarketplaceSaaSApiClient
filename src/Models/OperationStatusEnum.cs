@@ -5,6 +5,7 @@
         InProgress,
         Failed,
         Succeeded,
-        Conflict
+        Conflict,
+        NotStarted
     }
 }

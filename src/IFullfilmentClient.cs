@@ -16,7 +16,7 @@ namespace SaaSFulfillmentClient
 
         Task<Subscription> GetSubscriptionAsync(Guid subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken);
 
-        Task<SubscriptionOperation> GetSubscriptionOperationAsync(Guid subscriptionId, string operationId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken);
+        Task<SubscriptionOperation> GetSubscriptionOperationAsync(Guid subscriptionId, Guid operationId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken);
 
         Task<IEnumerable<SubscriptionOperation>> GetSubscriptionOperationsAsync(Guid subscriptionId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken);
 

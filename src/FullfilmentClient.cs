@@ -131,14 +131,14 @@ namespace SaaSFulfillmentClient
             return await FullfilmentRequestResult.ParseAsync<Subscription>(response);
         }
 
-        public async Task<SubscriptionOperation> GetSubscriptionOperationAsync(Guid subscriptionId, string operationId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
+        public async Task<SubscriptionOperation> GetSubscriptionOperationAsync(Guid subscriptionId, Guid operationId, Guid requestId, Guid correlationId, string bearerToken, CancellationToken cancellationToken)
         {
             var requestUrl = FluentUriBuilder
             .Start(this.baseUri)
             .AddPath("subscriptions")
             .AddPath(subscriptionId.ToString())
             .AddPath("operations")
-            .AddPath(operationId)
+            .AddPath(operationId.ToString())
             .AddQuery(DefaultApiVersionParameterName, this.apiVersion)
             .Uri;
 
